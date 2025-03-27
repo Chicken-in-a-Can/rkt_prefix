@@ -15,11 +15,13 @@
        (string-replace (
         string-replace (
         string-replace (
+        string-replace (
         string-replace line
         "+" " + ")
-        "/" " / ")
         "-" " - ")
-        "*" " * ") " ")))
+        "*" " * ")
+        "/" " / ")
+        "$" " $") " ")))
 
 (define (line_input line_lst)
   (when prompt?

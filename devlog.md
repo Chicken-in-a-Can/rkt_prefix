@@ -7,5 +7,5 @@ using the `prompt?` function provided, implemented it
 ### 3/27/25:12:00-12:30  
 Now splits the line input into sub arrays properly. Whitespace also works well with this  
 
-### 3/28/25:12:00-12:30  
+### 3/28/25:12:00-2:00  
 Now properly checks if the line has correct characters  

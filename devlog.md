@@ -9,3 +9,6 @@ Now splits the line input into sub arrays properly. Whitespace also works well w
 
 ### 3/28/25:12:00-2:00  
 Now properly checks if the line has correct characters  
+
+### 3/28/25:5:00-8:00
+Finished all. Now just debugging

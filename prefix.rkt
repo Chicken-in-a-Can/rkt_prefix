@@ -24,15 +24,23 @@
 
 ; get length
 (define (my_length lst)
-  (if (pair? lst)
-    2
-    (length lst)))
+  (length_recursion lst 0))
+
+(define (length_recursion lst count)
+  (if (null? lst)
+    count
+    (length_recursion (cdr lst) (+ count 1))))
 
 ; reverse
 (define (my_reverse lst)
-  (if (pair? lst)
-    (cons (last lst) (first lst))
+  (if (equal? (my_length lst) 2)
+    (cons (last lst) (car lst))
     (reverse lst)))
+
+(define (next_to_last lst)
+  (if (equal? (my_length lst) 2)
+    (car lst)
+    (first (cdr (my_reverse lst)))))
 
 ; Checks if char is one of our operators (+, -, *, /)
 (define (operator? ch) (if (equal? (string-length ch) 1)
@@ -85,28 +93,30 @@
 ; Replace the $num instances with values
 (define (replace_refs current_line line_lst)
   (if (prev_ref? (car current_line))
-    (append (get_ref (car current_line) (replace_refs (cdr current_line))))
+    (append (get_ref (car current_line) line_lst) (replace_refs (cdr current_line)))
     (append (car current_line) (replace_refs (cdr current_line)))))
 
 ; get last 2 elements
-(define (last_two numbers) (list (car (my_reverse numbers)) (car (cdr (my_reverse numbers)))))
-(define (replace_last_two numbers new_val) (append (my_reverse (cdr (cdr (my_reverse numbers)))) new_val))
+(define (last_two numbers) (displayln numbers) (list (last numbers) (next_to_last numbers)))
+(define (replace_last_two numbers new_val)
+  (if (equal? (my_length numbers) 2)
+    (list new_val)
+    (append (my_reverse (cddr (my_reverse numbers))) new_val)))
 
 ; Apply the operators
 (define (apply_operator operator numbers)
   (cond
-    [(equal? operator "+") (replace_last_two numbers (+ (car (last_two numbers)) (cdr (last_two numbers))))]
-    [(equal? operator "-") (replace_last_two numbers (- (car (last_two numbers)) (cdr (last_two numbers))))]
-    [(equal? operator "*") (replace_last_two numbers (* (car (last_two numbers)) (cdr (last_two numbers))))]
-    [(equal? operator "/") (replace_last_two numbers (/ (car (last_two numbers)) (cdr (last_two numbers))))]))
+    [(equal? operator "+") (replace_last_two numbers (+ (next_to_last numbers) (last numbers)))]
+    [(equal? operator "-") (replace_last_two numbers (- (next_to_last numbers) (last numbers)))]
+    [(equal? operator "*") (replace_last_two numbers (* (next_to_last numbers) (last numbers)))]
+    [(equal? operator "/") (replace_last_two numbers (/ (next_to_last numbers) (last numbers)))]))
 
 ; Evaluate recursively
 (define (eval_recurs current_line numbers)
-  (displayln numbers)
   (if (empty? current_line)
-    (if (equal? (my_length (list numbers)) 1)
-      (car numbers)
-      (error "Error: More numbers than operators"))
+    (if (equal? (my_length numbers) 1)
+      numbers
+      (error "Error: Too few operators"))
     (if (is-number? (car current_line))
       (eval_recurs (cdr current_line) (append numbers (list (real->double-flonum (string->number (car current_line))))))
       (if (>= (my_length numbers) 2)

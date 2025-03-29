@@ -18,3 +18,6 @@ Length giving me issues
 
 ### 3/28/25:8:00-10:30
 contract violations are everflowing  
+
+### 3/28/25:10:30-12:00
+some prefix stuff works, some doesn't. submitting for now. Will submit again after deadline (for 15% penalty)

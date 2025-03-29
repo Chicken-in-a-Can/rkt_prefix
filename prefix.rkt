@@ -77,25 +77,26 @@
     (append (car current_line) (replace_refs (cdr current_line)))))
 
 ; get last 2 elements
-(define (last_two numbers) (cons (car (reverse numbers)) (car (cdr (reverse numbers)))))
-(define (replace_last_two numbers new_val) (append new_val (reverse (cdr (cdr (reverse numbers))))))
+(define (last_two numbers) (list (car (reverse numbers)) (car (cdr (reverse numbers)))))
+(define (replace_last_two numbers new_val) (append (reverse (cdr (cdr (reverse numbers)))) new_val))
 
 ; Apply the operators
 (define (apply_operator operator numbers)
   (cond
-    [(equal? operator "+") (replace_last_two numbers (+ (car (last_two numbers) (cdr (last_two)))))]
-    [(equal? operator "-") (replace_last_two numbers (- (car (last_two numbers) (cdr (last_two)))))]
-    [(equal? operator "*") (replace_last_two numbers (* (car (last_two numbers) (cdr (last_two)))))]
-    [(equal? operator "/") (replace_last_two numbers (/ (car (last_two numbers) (cdr (last_two)))))]))
+    [(equal? operator "+") (replace_last_two numbers (+ (car (last_two numbers)) (car (cdr (last_two numbers)))))]
+    [(equal? operator "-") (replace_last_two numbers (- (car (last_two numbers)) (car (cdr (last_two numbers)))))]
+    [(equal? operator "*") (replace_last_two numbers (* (car (last_two numbers)) (car (cdr (last_two numbers)))))]
+    [(equal? operator "/") (replace_last_two numbers (/ (car (last_two numbers)) (car (cdr (last_two numbers)))))]))
 
 ; Evaluate recursively
 (define (eval_recurs current_line numbers)
+  (displayln numbers)
   (if (empty? current_line)
-    (if (equal? (length numbers) 1)
+    (if (equal? (length (list numbers)) 1)
       (car numbers)
       (error "Error: More numbers than operators"))
     (if (is-number? (car current_line))
-      (append numbers (real->double-flonum (string->number (car current_line))))
+      (eval_recurs (cdr current_line) (append numbers (list (real->double-flonum (string->number (car current_line))))))
       (if (>= (length numbers) 2)
         (eval_recurs (cdr current_line) (apply_operator (car current_line) numbers))
         (error "Error: Not enough numbers in stack")))))
@@ -106,12 +107,16 @@
 
 ; Get user input
 (define (line_input line_lst)
-  (if (not (empty? line_lst)) (displayln (car (reverse line_lst))) (display ""))
+  (if (not (empty? line_lst)) (displayln (car (reverse (list line_lst)))) (display ""))
   (when prompt?
     (display "Prefix Operation: "))
   (define input_line (read-line (current-input-port) 'any))
   (if (not (equal? input_line "quit"))
-      (line_input (append line_lst (list (if (validate_line_elements (split_line input_line))) (eval_line input_line line_lst) (error "Error: Improper line syntax"))))
+      (line_input
+        (append line_lst
+          (if (validate_line_elements (split_line input_line))
+              (list (eval_line (split_line input_line) line_lst))
+              (error "Error: Improper line syntax"))))
       line_lst
   ))
 

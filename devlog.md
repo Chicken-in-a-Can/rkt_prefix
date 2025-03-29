@@ -12,3 +12,6 @@ Now properly checks if the line has correct characters
 
 ### 3/28/25:5:00-8:00
 Finished all. Now just debugging
+
+### 3/28/25:8:00-10:00
+Length giving me issues

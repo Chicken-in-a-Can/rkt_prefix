@@ -22,6 +22,18 @@
     (string-ref str 0)
     (error "Error: Not a valid input")))
 
+; get length
+(define (my_length lst)
+  (if (pair? lst)
+    2
+    (length lst)))
+
+; reverse
+(define (my_reverse lst)
+  (if (pair? lst)
+    (cons (last lst) (first lst))
+    (reverse lst)))
+
 ; Checks if char is one of our operators (+, -, *, /)
 (define (operator? ch) (if (equal? (string-length ch) 1)
   (is-any (string-char ch) '(#\+ #\- #\* #\/))
@@ -66,7 +78,7 @@
 
 ; get the reference val
 (define (get_ref ref line_lst)
-  (if (< (string->number (substring ref 1 (string-length ref)) (length line_lst)))
+  (if (< (string->number (substring ref 1 (string-length ref)) (my_length line_lst)))
     (string->number (substring ref 1 (string-length ref)))
     (error "Error: Invalid reference to previous result")))
 
@@ -77,27 +89,27 @@
     (append (car current_line) (replace_refs (cdr current_line)))))
 
 ; get last 2 elements
-(define (last_two numbers) (list (car (reverse numbers)) (car (cdr (reverse numbers)))))
-(define (replace_last_two numbers new_val) (append (reverse (cdr (cdr (reverse numbers)))) new_val))
+(define (last_two numbers) (list (car (my_reverse numbers)) (car (cdr (my_reverse numbers)))))
+(define (replace_last_two numbers new_val) (append (my_reverse (cdr (cdr (my_reverse numbers)))) new_val))
 
 ; Apply the operators
 (define (apply_operator operator numbers)
   (cond
-    [(equal? operator "+") (replace_last_two numbers (+ (car (last_two numbers)) (car (cdr (last_two numbers)))))]
-    [(equal? operator "-") (replace_last_two numbers (- (car (last_two numbers)) (car (cdr (last_two numbers)))))]
-    [(equal? operator "*") (replace_last_two numbers (* (car (last_two numbers)) (car (cdr (last_two numbers)))))]
-    [(equal? operator "/") (replace_last_two numbers (/ (car (last_two numbers)) (car (cdr (last_two numbers)))))]))
+    [(equal? operator "+") (replace_last_two numbers (+ (car (last_two numbers)) (cdr (last_two numbers))))]
+    [(equal? operator "-") (replace_last_two numbers (- (car (last_two numbers)) (cdr (last_two numbers))))]
+    [(equal? operator "*") (replace_last_two numbers (* (car (last_two numbers)) (cdr (last_two numbers))))]
+    [(equal? operator "/") (replace_last_two numbers (/ (car (last_two numbers)) (cdr (last_two numbers))))]))
 
 ; Evaluate recursively
 (define (eval_recurs current_line numbers)
   (displayln numbers)
   (if (empty? current_line)
-    (if (equal? (length (list numbers)) 1)
+    (if (equal? (my_length (list numbers)) 1)
       (car numbers)
       (error "Error: More numbers than operators"))
     (if (is-number? (car current_line))
       (eval_recurs (cdr current_line) (append numbers (list (real->double-flonum (string->number (car current_line))))))
-      (if (>= (length numbers) 2)
+      (if (>= (my_length numbers) 2)
         (eval_recurs (cdr current_line) (apply_operator (car current_line) numbers))
         (error "Error: Not enough numbers in stack")))))
 

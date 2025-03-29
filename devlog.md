@@ -20,4 +20,7 @@ Length giving me issues
 contract violations are everflowing  
 
 ### 3/28/25:10:30-12:00
-some prefix stuff works, some doesn't. submitting for now. Will submit again after deadline (for 15% penalty)
+some prefix stuff works, some doesn't. submitting for now. Will submit again after deadline (for 15% penalty)  
+
+### 3/29/25:3:00-6:00
+Running into issues with cdr still. Some components have been rewritten, but it's been annoying cause I can't figure out the specific cdr that's causing the issue  

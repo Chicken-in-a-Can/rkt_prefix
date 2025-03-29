@@ -96,8 +96,7 @@
     (append (get_ref (car current_line) line_lst) (replace_refs (cdr current_line)))
     (append (car current_line) (replace_refs (cdr current_line)))))
 
-; get last 2 elements
-(define (last_two numbers) (displayln numbers) (list (last numbers) (next_to_last numbers)))
+; replace last 2 elements
 (define (replace_last_two numbers new_val)
   (if (equal? (my_length numbers) 2)
     (list new_val)
@@ -105,17 +104,19 @@
 
 ; Apply the operators
 (define (apply_operator operator numbers)
-  (cond
-    [(equal? operator "+") (replace_last_two numbers (+ (next_to_last numbers) (last numbers)))]
-    [(equal? operator "-") (replace_last_two numbers (- (next_to_last numbers) (last numbers)))]
-    [(equal? operator "*") (replace_last_two numbers (* (next_to_last numbers) (last numbers)))]
-    [(equal? operator "/") (replace_last_two numbers (/ (next_to_last numbers) (last numbers)))]))
+  (if (>= (my_length numbers) 2)
+  (replace_last_two numbers (cond
+    [(equal? operator "+") (+ (next_to_last numbers) (last numbers))]
+    [(equal? operator "-") (- (next_to_last numbers) (last numbers))]
+    [(equal? operator "*") (* (next_to_last numbers) (last numbers))]
+    [(equal? operator "/") (/ (next_to_last numbers) (last numbers))]))
+  (error "Error: Not enough numbers in stack")))
 
 ; Evaluate recursively
 (define (eval_recurs current_line numbers)
   (if (empty? current_line)
     (if (equal? (my_length numbers) 1)
-      numbers
+      (car numbers)
       (error "Error: Too few operators"))
     (if (is-number? (car current_line))
       (eval_recurs (cdr current_line) (append numbers (list (real->double-flonum (string->number (car current_line))))))
@@ -129,7 +130,7 @@
 
 ; Get user input
 (define (line_input line_lst)
-  (if (not (empty? line_lst)) (displayln (car (reverse (list line_lst)))) (display ""))
+  (if (not (empty? line_lst)) (displayln (last line_lst)) (display ""))
   (when prompt?
     (display "Prefix Operation: "))
   (define input_line (read-line (current-input-port) 'any))

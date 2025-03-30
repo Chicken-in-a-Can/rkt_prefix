@@ -24,23 +24,26 @@
 
 ; get length
 (define (my_length lst)
-  (length_recursion lst 0))
-
-(define (length_recursion lst count)
-  (if (null? lst)
-    count
-    (length_recursion (cdr lst) (+ count 1))))
+  (if (number? lst)
+    1
+    (if (null? lst)
+      0
+      (+ 1 (my_length (cdr lst))))))
 
 ; reverse
 (define (my_reverse lst)
-  (if (equal? (my_length lst) 2)
-    (cons (last lst) (car lst))
-    (reverse lst)))
+  (cond
+    [(equal? (my_length lst) 0) '()]
+    [(equal? (my_length lst) 1) (car lst)]
+    [(equal? (my_length lst) 2) (list (last lst) (car lst))]
+    [else (reverse lst)]))
 
 (define (next_to_last lst)
-  (if (equal? (my_length lst) 2)
-    (car lst)
-    (first (cdr (my_reverse lst)))))
+  (if (< (my_length lst) 2)
+    (error "Error: List has too few elements for this operation")
+    (if (equal? (my_length lst) 2)
+      (car lst)
+      (second (my_reverse lst)))))
 
 ; Checks if char is one of our operators (+, -, *, /)
 (define (operator? ch) (if (equal? (string-length ch) 1)
@@ -52,7 +55,11 @@
     (if (> (string-length str) 1)
       (is-number? (substring str 1 (string-length str)))
       #t)
-    #f))
+    (if (equal? (string-ref str 0) #\.)
+      (if (> (string-length str) 1)
+        (is-number? (substring str 1 (string-length str)))
+        #f)
+      #f)))
 ; Checks if element is  reference to prior output
 (define (prev_ref? str) (if (equal? (string-ref str 0) #\$)
   (if (is-number? (substring str 1 (string-length str)))
@@ -86,37 +93,39 @@
 
 ; get the reference val
 (define (get_ref ref line_lst)
-  (if (< (string->number (substring ref 1 (string-length ref)) (my_length line_lst)))
-    (string->number (substring ref 1 (string-length ref)))
+  (if (<= (string->number (substring ref 1)) (my_length line_lst))
+    (number->string (list-ref line_lst (- (string->number (substring ref 1)) 1)))
     (error "Error: Invalid reference to previous result")))
 
 ; Replace the $num instances with values
 (define (replace_refs current_line line_lst)
-  (if (prev_ref? (car current_line))
-    (append (get_ref (car current_line) line_lst) (replace_refs (cdr current_line)))
-    (append (car current_line) (replace_refs (cdr current_line)))))
+  (if (empty? current_line)
+    current_line
+    (if (prev_ref? (car current_line))
+      (cons (get_ref (car current_line) line_lst) (replace_refs (cdr current_line) line_lst))
+      (cons (car current_line) (replace_refs (cdr current_line) line_lst)))))
 
 ; replace last 2 elements
 (define (replace_last_two numbers new_val)
   (if (equal? (my_length numbers) 2)
-    (list new_val)
-    (append (my_reverse (cddr (my_reverse numbers))) new_val)))
+    (append '() new_val)
+    (list (my_reverse (cddr (my_reverse numbers))) new_val )))
 
 ; Apply the operators
 (define (apply_operator operator numbers)
   (if (>= (my_length numbers) 2)
   (replace_last_two numbers (cond
-    [(equal? operator "+") (+ (next_to_last numbers) (last numbers))]
-    [(equal? operator "-") (- (next_to_last numbers) (last numbers))]
-    [(equal? operator "*") (* (next_to_last numbers) (last numbers))]
-    [(equal? operator "/") (/ (next_to_last numbers) (last numbers))]))
-  (error "Error: Not enough numbers in stack")))
+    [(equal? operator "+") (+ (last numbers) (next_to_last numbers))]
+    [(equal? operator "-") (- (last numbers) (next_to_last numbers))]
+    [(equal? operator "*") (* (last numbers) (next_to_last numbers))]
+    [(equal? operator "/") (/ (last numbers) (next_to_last numbers))]))
+  (error "Error: Not enough numbers in stack to apply operator")))
 
 ; Evaluate recursively
 (define (eval_recurs current_line numbers)
   (if (empty? current_line)
     (if (equal? (my_length numbers) 1)
-      (car numbers)
+      numbers
       (error "Error: Too few operators"))
     (if (is-number? (car current_line))
       (eval_recurs (cdr current_line) (append numbers (list (real->double-flonum (string->number (car current_line))))))
@@ -126,7 +135,7 @@
 
 ; Evaluate the current line
 (define (eval_line current_line line_lst)
-  (eval_recurs (reverse current_line) '()))
+  (eval_recurs (reverse (replace_refs current_line line_lst)) '()))
 
 ; Get user input
 (define (line_input line_lst)
